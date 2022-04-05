@@ -28,8 +28,12 @@
     margin-top: -3px;
 }
 
-.handle--end {
-    background: #47acff;
+.handle__start {
+    background-color: #ff6347;
+}
+
+.handle__end {
+    background-color: #47acff;
 }
 
 .filler {

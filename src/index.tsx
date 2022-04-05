@@ -1,4 +1,4 @@
-import { useState, useRef, MouseEventHandler, useEffect, useMemo } from 'react';
+import { useState, useRef, MouseEventHandler, useEffect } from 'react';
 import styles from './styles.module.css';
 
 
@@ -12,22 +12,6 @@ interface Props {
     onChange: (time: TimeRange) => void,
 }
 
-const normalize = (value: number): number => value > 360 ? normalize(value - 360) : value;
-
-// function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-// //     const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-
-// //     return {
-// //         x: centerX + (radius * Math.cos(angleInRadians)),
-// //         y: centerY + (radius * Math.sin(angleInRadians))
-// //     };
-// // }
-
-
-// 0 - 3
-// 90 - 6
-// -180 - 9
-// -90 - 12
 
 const convertHoursToAngle = (hours: number) => {
     let angle = (360 / 100) * ((hours / 12) * 100);
@@ -45,8 +29,10 @@ const convertHoursToAngle = (hours: number) => {
 
 const convertAngleToHours = (angle: number) => +((angle / (360 / 100)) / 100 * 12).toFixed(2);
 
+const classnames = (...args: string[]) => args.filter(className => Boolean(className)).join(' ');
 
-export const Clocker = ({ time = [0, 18], onChange = () => {} }: Partial<Props>) => {
+
+export const Clocker = ({ time = [0, 18], onChange = () => { } }: Partial<Props>) => {
     const [isDragging, setDragging] = useState(false);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
@@ -55,26 +41,20 @@ export const Clocker = ({ time = [0, 18], onChange = () => {} }: Partial<Props>)
     const start = convertHoursToAngle(time[0]);
     const end = convertHoursToAngle(time[1]);
 
-    const handle = useRef<HTMLDivElement | null>(null);
     const container = useRef<HTMLDivElement | null>(null);
 
 
-    const onMouseDown: MouseEventHandler = (event) => {
+    const onDragStart: MouseEventHandler = (event) => {
         setDragging(true);
         setStartPoint({ x: event.clientX, y: event.clientY });
     };
 
-    const onMouseUp: MouseEventHandler = () => {
+    const onDragEnd: MouseEventHandler = () => {
         setDragging(false);
         onChange(time);
     };
 
-    const onMouseLeave: MouseEventHandler = () => {
-        setDragging(false);
-        onChange(time);
-    };
-
-    const onMouseMove: MouseEventHandler = (event) => {
+    const onDrag: MouseEventHandler = (event) => {
         if (!isDragging) {
             return;
         }
@@ -111,20 +91,13 @@ export const Clocker = ({ time = [0, 18], onChange = () => {} }: Partial<Props>)
         <div
             ref={container}
             className={styles.root}
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onMouseLeave={onMouseLeave}
+            onMouseDown={onDragStart}
+            onMouseMove={onDrag}
+            onMouseUp={onDragEnd}
+            onMouseLeave={onDragEnd}
         >
-            <div
-                ref={handle}
-                className={styles.handle}
-                style={{ transform: `rotate(${start}deg)` }}
-            />
-            <div
-                className={[styles.handle, styles['handle--end']].join(' ')}
-                style={{ transform: `rotate(${end}deg)` }}
-            />
+            <div className={classnames(styles.handle, styles.handle__start)} style={{ transform: `rotate(${start}deg)` }} />
+            <div className={classnames(styles.handle, styles.handle__end)} style={{ transform: `rotate(${end}deg)` }} />
         </div>
     );
 };
