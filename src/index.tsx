@@ -1,4 +1,5 @@
 import { useState, useRef, MouseEventHandler, useEffect } from 'react';
+import { convertHoursToAngle, convertAngleToHours, classnames, getFillAngle } from './helpers';
 import styles from './styles.module.css';
 
 
@@ -13,26 +14,7 @@ interface Props {
 }
 
 
-const convertHoursToAngle = (hours: number) => {
-    let angle = (360 / 100) * ((hours / 12) * 100);
-
-    if (angle < 0) {
-        angle += 360;
-    }
-
-    if (angle > 360) {
-        angle -= 360;
-    }
-
-    return angle;
-};
-
-const convertAngleToHours = (angle: number) => +((angle / (360 / 100)) / 100 * 12).toFixed(2);
-
-const classnames = (...args: string[]) => args.filter(className => Boolean(className)).join(' ');
-
-
-export const Clocker = ({ time = [0, 18], onChange = () => { } }: Partial<Props>) => {
+export const Clocker = ({ time = [0, 18], onChange = () => {} }: Partial<Props>) => {
     const [isDragging, setDragging] = useState(false);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
@@ -51,7 +33,6 @@ export const Clocker = ({ time = [0, 18], onChange = () => { } }: Partial<Props>
 
     const onDragEnd: MouseEventHandler = () => {
         setDragging(false);
-        onChange(time);
     };
 
     const onDrag: MouseEventHandler = (event) => {
@@ -96,6 +77,17 @@ export const Clocker = ({ time = [0, 18], onChange = () => { } }: Partial<Props>
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
         >
+            <svg className={styles.filler} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
+                <circle
+                    r="5"
+                    cx="10"
+                    cy="10"
+                    fill="transparent"
+                    stroke="tomato"
+                    strokeWidth="10"
+                    strokeDasharray={`calc(${getFillAngle(start, end)} * 31.4 / 100) 31.4`}
+                />
+            </svg>
             <div className={classnames(styles.handle, styles.handle__start)} style={{ transform: `rotate(${start}deg)` }} />
             <div className={classnames(styles.handle, styles.handle__end)} style={{ transform: `rotate(${end}deg)` }} />
         </div>
