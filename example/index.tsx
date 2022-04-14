@@ -4,20 +4,32 @@ import { Clocker } from '../dist';
 
 
 const App = () => {
-    const [[startTime, endTime], setTimeRange] = useState([0, 3]);
+    const [[startTime, endTime], setTimeRange] = useState([0, 13]);
 
     return (
         <>
-            <Clocker format="12h" time={[startTime, endTime]} onChange={time => setTimeRange(time)} />
+            <Clocker format="24h" time={[startTime, endTime]} onChange={time => setTimeRange(time)} />
             <div>
                 start time = {startTime}
                 <br />
-                <input type="range" min="0" max="12" value={startTime} onChange={event => setTimeRange([Number(event.target.value), endTime])} />
+                <input
+                    type="range"
+                    min="0"
+                    max="24"
+                    value={startTime}
+                    onChange={event => setTimeRange([Number(event.target.value), endTime])}
+                />
             </div>
             <div>
                 end time = {endTime}
                 <br />
-                <input type="range" min="0" max="12" value={endTime} onChange={event => setTimeRange([startTime, Number(event.target.value)])} />
+                <input
+                    type="range"
+                    min="0"
+                    max="24"
+                    value={endTime}
+                    onChange={event => setTimeRange([startTime, Number(event.target.value)])}
+                />
             </div>
         </>
     );
