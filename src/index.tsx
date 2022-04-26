@@ -79,10 +79,18 @@ export const Clocker = ({ format = '24h', time = [0, 18], onChange = () => {} }:
         const currentAngle = Math.atan2(position.y - centerPoint.y, position.x - centerPoint.x);
         const delta = (currentAngle - startAngle) * 180 / Math.PI;
 
-        onChange([
-            convertAngleToHours(start + delta),
-            convertAngleToHours(end + delta),
-        ]);
+        let startTime = convertAngleToHours(start + delta);
+        let endTime = convertAngleToHours(end + delta);
+
+        if (hasAdditionalCircle && startTime > endTime) {
+            startTime += 12;
+        }
+
+        if (hasAdditionalCircle && endTime < startTime) {
+            endTime += 12;
+        }
+
+        onChange([startTime, endTime]);
 
         setStartPoint(position);
     };
