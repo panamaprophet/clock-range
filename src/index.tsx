@@ -48,6 +48,9 @@ export const Clocker = ({ format = '24h', time = [0, 18], onChange = () => {} }:
     const startHours = is24(format) ? convert24to12(time[0]) : time[0];
     const endHours = is24(format) ? convert24to12(time[1]) : time[1];
 
+    const hasAdditionalStartHours = startHours !== time[0];
+    const hasAdditionalEndHours = endHours !== time[1];
+
     const hasAdditionalCircle = Math.abs(time[1] - time[0]) > 12;
 
     const start = convertHoursToAngle(startHours);
@@ -79,16 +82,38 @@ export const Clocker = ({ format = '24h', time = [0, 18], onChange = () => {} }:
         const currentAngle = Math.atan2(position.y - centerPoint.y, position.x - centerPoint.x);
         const delta = (currentAngle - startAngle) * 180 / Math.PI;
 
-        let startTime = convertAngleToHours(start + delta);
-        let endTime = convertAngleToHours(end + delta);
+        let newStartAngle = start + delta;
+        let newEndAngle = end + delta;
 
-        if (hasAdditionalCircle && startTime > endTime) {
+        if (newStartAngle < 0) {
+            newStartAngle = newStartAngle + 360;
+        }
+
+        if (newEndAngle < 0) {
+            newEndAngle = newEndAngle + 360;
+        }
+
+        if (newStartAngle > 360) {
+            newStartAngle = newStartAngle - 360;
+        }
+
+        if (newEndAngle > 360) {
+            newEndAngle = newEndAngle - 360;
+        }
+
+        let startTime = convertAngleToHours(newStartAngle);
+        let endTime = convertAngleToHours(newEndAngle);
+
+        if (hasAdditionalStartHours) {
             startTime += 12;
         }
 
-        if (hasAdditionalCircle && endTime < startTime) {
+        if (hasAdditionalEndHours) {
             endTime += 12;
         }
+
+        // console.log(start + delta, end + delta);
+        // console.log(time, '->', hasAdditionalCircle, '->', [startTime, endTime]);
 
         onChange([startTime, endTime]);
 
