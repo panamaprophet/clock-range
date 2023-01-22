@@ -43,10 +43,6 @@ const Circle = (customProps: { [k: string]: unknown }) => {
     return <circle {...props} />;
 };
 
-// @todo: fix the second circle
-// @todo: fix 24-h range second circle
-// @todo: fix rotation backward
-
 export const Clocker = ({
     time = [0, 18],
     onChange = () => {},
@@ -62,6 +58,7 @@ export const Clocker = ({
     const start = convertHoursToAngle(time[0]);
     const end = convertHoursToAngle(time[1]);
 
+    // @todo: fix the second circle
     const hasAdditionalCircle = (end - start < 0) || (Math.abs(time[1] - time[0]) > 12);
 
     const container = useRef<HTMLDivElement | null>(null);
@@ -90,8 +87,11 @@ export const Clocker = ({
 
         let delta = (currentAngle - startAngle);
 
-        // @todo: wtf is that? - ah, maybe current angle the root cause
-        if (delta < -350) delta += 360;
+        // @todo:
+        // sometimes delta surprisingly comes extrimely high 
+        // need to figure out how to normalize it properly
+        if (delta < -100) delta += 360;
+        if (delta > 100) delta -= 360;
 
         let newStartTime = convertAngleToHours(start + delta) % 24;
         let newEndTime = convertAngleToHours(end + delta) % 24;
