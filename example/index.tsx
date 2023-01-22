@@ -3,14 +3,25 @@ import * as ReactDOMClient from 'react-dom/client';
 import { Clocker } from '../dist';
 
 
+const formatTime = (time: number) =>
+    [
+        (time | 0),
+        (time % 1) * 60 | 0
+    ]
+        .map(n => n
+            .toString()
+            .padStart(2, '0')
+        )
+        .join(':');
+
 const App = () => {
     const [[startTime, endTime], setTimeRange] = useState([0, 13]);
 
     return (
         <>
-            <Clocker format="24h" time={[startTime, endTime]} onChange={time => setTimeRange(time)} />
+            <Clocker time={[startTime, endTime]} onChange={time => setTimeRange(time)} />
             <div>
-                start time = {startTime}
+                start time = {formatTime(startTime)}
                 <br />
                 <input
                     type="range"
@@ -21,7 +32,7 @@ const App = () => {
                 />
             </div>
             <div>
-                end time = {endTime}
+                end time = {formatTime(endTime)}
                 <br />
                 <input
                     type="range"

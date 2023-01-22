@@ -1,25 +1,30 @@
 import { useState, useRef, MouseEventHandler, useEffect } from 'react';
-import { convertHoursToAngle, convertAngleToHours, classnames, getFillAngle } from './helpers';
 import styles from './styles.module.css';
 
 
 type TimeRange = [start: number, end: number];
 
-type TimeFormat = '12h' | '24h';
 
-interface Props {
-    format: TimeFormat,
-    time: TimeRange,
-    onChange: (time: TimeRange) => void,
-}
+const convertHoursToAngle = (hours: number) => (360 / 12) * hours;
+
+const convertAngleToHours = (angle: number) => angle / (360 / 12);
+
+const getFillAngle = (start: number, end: number) => {
+    if (end === start) {
+        return 360;
+    }
+
+    if (end <= start) {
+        return (360 - start + end) / 360 * 100;
+    }
+
+    return (end - start) / 360 * 100;
+};
+
+const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
 
 
-const is24 = (format: TimeFormat) => format === '24h';
-
-const convert24to12 = (hours: number) => hours > 12 ? hours - 12 : hours;
-
-
-const Circle = (customProps: {[k: string]: unknown}) => {
+const Circle = (customProps: { [k: string]: unknown }) => {
     const defaultProps = {
         r: 5,
         cx: 10,
@@ -27,7 +32,7 @@ const Circle = (customProps: {[k: string]: unknown}) => {
         fill: 'transparent',
         stroke: 'tomato',
         strokeWidth: 10,
-        strokeOpacity: 0.5, 
+        strokeOpacity: 0.5,
     };
 
     const props = {
@@ -35,29 +40,31 @@ const Circle = (customProps: {[k: string]: unknown}) => {
         ...customProps,
     };
 
-    return <circle { ...props } />;
-}
+    return <circle {...props} />;
+};
 
+// @todo: fix the second circle
+// @todo: fix 24-h range second circle
+// @todo: fix rotation backward
 
-export const Clocker = ({ format = '24h', time = [0, 18], onChange = () => {} }: Partial<Props>) => {
+export const Clocker = ({
+    time = [0, 18],
+    onChange = () => {},
+}: {
+    time: TimeRange,
+    onChange: (time: TimeRange) => void,
+}) => {
     const [isDragging, setDragging] = useState(false);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
     const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
-    const startHours = is24(format) ? convert24to12(time[0]) : time[0];
-    const endHours = is24(format) ? convert24to12(time[1]) : time[1];
+    const start = convertHoursToAngle(time[0]);
+    const end = convertHoursToAngle(time[1]);
 
-    const hasAdditionalStartHours = startHours !== time[0];
-    const hasAdditionalEndHours = endHours !== time[1];
-
-    const hasAdditionalCircle = Math.abs(time[1] - time[0]) > 12;
-
-    const start = convertHoursToAngle(startHours);
-    const end = convertHoursToAngle(endHours);
+    const hasAdditionalCircle = (end - start < 0) || (Math.abs(time[1] - time[0]) > 12);
 
     const container = useRef<HTMLDivElement | null>(null);
-
 
     const onDragStart: MouseEventHandler = (event) => {
         setDragging(true);
@@ -78,44 +85,21 @@ export const Clocker = ({ format = '24h', time = [0, 18], onChange = () => {} }:
             y: event.clientY,
         };
 
-        const startAngle = Math.atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x);
-        const currentAngle = Math.atan2(position.y - centerPoint.y, position.x - centerPoint.x);
-        const delta = (currentAngle - startAngle) * 180 / Math.PI;
+        const startAngle = Math.atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x) * 180 / Math.PI;
+        const currentAngle = Math.atan2(position.y - centerPoint.y, position.x - centerPoint.x) * 180 / Math.PI;
 
-        let newStartAngle = start + delta;
-        let newEndAngle = end + delta;
+        let delta = (currentAngle - startAngle);
 
-        if (newStartAngle < 0) {
-            newStartAngle = newStartAngle + 360;
-        }
+        // @todo: wtf is that? - ah, maybe current angle the root cause
+        if (delta < -350) delta += 360;
 
-        if (newEndAngle < 0) {
-            newEndAngle = newEndAngle + 360;
-        }
+        let newStartTime = convertAngleToHours(start + delta) % 24;
+        let newEndTime = convertAngleToHours(end + delta) % 24;
 
-        if (newStartAngle > 360) {
-            newStartAngle = newStartAngle - 360;
-        }
+        if (newStartTime < 0) newStartTime += 24;
+        if (newEndTime < 0) newEndTime += 24;
 
-        if (newEndAngle > 360) {
-            newEndAngle = newEndAngle - 360;
-        }
-
-        let startTime = convertAngleToHours(newStartAngle);
-        let endTime = convertAngleToHours(newEndAngle);
-
-        if (hasAdditionalStartHours) {
-            startTime += 12;
-        }
-
-        if (hasAdditionalEndHours) {
-            endTime += 12;
-        }
-
-        // console.log(start + delta, end + delta);
-        // console.log(time, '->', hasAdditionalCircle, '->', [startTime, endTime]);
-
-        onChange([startTime, endTime]);
+        onChange([newStartTime, newEndTime]);
 
         setStartPoint(position);
     };
@@ -142,7 +126,7 @@ export const Clocker = ({ format = '24h', time = [0, 18], onChange = () => {} }:
         >
             <svg className={styles.filler} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
                 {hasAdditionalCircle && <Circle />}
-                <Circle strokeDasharray={`calc(${getFillAngle(start, end)} * 31.4 / 100) 31.4`} />
+                <Circle strokeDasharray={`calc(${getFillAngle(start % 360, end % 360)} * 31.4 / 100) 31.4`} />
             </svg>
             <div className={classnames(styles.handle, styles.handle__start)} style={{ transform: `rotate(${start}deg)` }} />
             <div className={classnames(styles.handle, styles.handle__end)} style={{ transform: `rotate(${end}deg)` }} />
