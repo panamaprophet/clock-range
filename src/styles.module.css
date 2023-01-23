@@ -2,42 +2,42 @@
     position: relative;
     width: 100%;
     height: 100%;
-
     transform: rotate(-90deg);
     border-radius: 50%;
     cursor: pointer;
-
-    background: #fef;
-
+    background: rgba(66.7, 54.1, 22.4, 0.1);
     overflow: hidden;
+    user-select: none;
 }
 
 .handle {
-    width: 100%;
+    width: 50%;
     height: 6px;
-
     position: absolute;
-
     top: 50%;
     left: 50%;
-
-    background: #ff6347;
-
     transform-origin: center left;
-
     margin-top: -3px;
+    border-radius: 3px;
 }
 
 .handle__start {
-    background-color: #ff6347;
+    background-color: #aa4f39;
 }
 
 .handle__end {
-    background-color: #47acff;
+    background-color: #27566b;
 }
 
 .filler {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+.circle {
+    fill: transparent;
+    stroke: #aa8a39;
+    stroke-width: 10;
+    stroke-opacity: 0.5;
 }

@@ -22,22 +22,14 @@ const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
 
 
 const Circle = (customProps: { [k: string]: unknown }) => {
-    const defaultProps = {
+    const props = {
         r: 5,
         cx: 10,
         cy: 10,
-        fill: 'transparent',
-        stroke: 'tomato',
-        strokeWidth: 10,
-        strokeOpacity: 0.5,
-    };
-
-    const props = {
-        ...defaultProps,
         ...customProps,
     };
 
-    return <circle {...props} />;
+    return <circle className={styles.circle} {...props} />;
 };
 
 
