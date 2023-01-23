@@ -1,5 +1,10 @@
-# clock-range
+<h1>Time range selector</h1>
 
-Analog clock style time range selector
+<br>
 
-<img width="340" alt="Screenshot 2023-01-22 at 23 40 33" src="https://user-images.githubusercontent.com/3436628/213944206-800b6cec-05dd-4f73-a4fd-c7f387e9edd1.png">
+<p>This is a time range selector in a style of analog clock.</p>
+<p>Supports handles and range area dragging.</p>
+
+<br>
+
+<p><a href="https://react-clock-range.s3.eu-west-1.amazonaws.com/index.html">Check the demo</a></p>

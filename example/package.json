@@ -12,6 +12,7 @@
     "clock-range": "link:../"
   },
   "scripts": {
-    "watch": "../node_modules/.bin/parcel --no-cache index.html"
+    "watch": "../node_modules/.bin/parcel --no-cache index.html",
+    "build": "../node_modules/.bin/parcel build index.html"
   }
 }
