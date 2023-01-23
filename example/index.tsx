@@ -1,25 +1,18 @@
 import React, { useState } from 'react';
 import * as ReactDOMClient from 'react-dom/client';
-import { Clocker } from '../dist';
+import { ClockRange, formatTime } from '../src';
 
-
-const formatTime = (time: number) =>
-    [
-        (time | 0),
-        (time % 1) * 60 | 0
-    ]
-        .map(n => n
-            .toString()
-            .padStart(2, '0')
-        )
-        .join(':');
 
 const App = () => {
-    const [[startTime, endTime], setTimeRange] = useState([0, 13]);
+    const [timeRange, setTimeRange] = useState([0, 13]);
+    const [startTime, endTime] = timeRange;
 
     return (
         <>
-            <Clocker time={[startTime, endTime]} onChange={time => setTimeRange(time)} />
+            <ClockRange range={timeRange} onChange={range => setTimeRange(range)} />
+
+            {/* optional stuff */}
+
             <div>
                 start time = {formatTime(startTime)}
                 <br />

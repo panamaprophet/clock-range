@@ -9,7 +9,7 @@
     "react": "link:../node_modules/react",
     "react-dom": "link:../node_modules/react-dom",
     "typescript": "link:../node_modules/typescript",
-    "clocker": "link:../"
+    "clock-range": "link:../"
   },
   "scripts": {
     "watch": "../node_modules/.bin/parcel --no-cache index.html"

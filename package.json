@@ -1,5 +1,5 @@
 {
-  "name": "clocker",
+  "name": "clock-range",
   "version": "0.0.1",
   "description": "time range selector",
   "main": "dist/index.js",

@@ -40,25 +40,37 @@ const Circle = (customProps: { [k: string]: unknown }) => {
     return <circle {...props} />;
 };
 
-export const Clocker = ({
-    time = [0, 18],
-    onChange = () => { },
-}: {
-    time: number[],
+
+interface Props {
+    range: number[],
     onChange: (time: number[]) => void,
-}) => {
+}
+
+
+export const formatTime = (time: number) => {
+    const hours = time | 0;
+    const minutes = (time % 1) * 60 | 0;
+
+    return [hours, minutes]
+        .map(t => t
+            .toString()
+            .padStart(2, '0'))
+        .join(':');
+};
+
+export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
     const [dragType, setDragType] = useState<'range' | 'start' | 'end' | null>(null);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
     const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
-    const start = convertHoursToAngle(time[0]);
-    const end = convertHoursToAngle(time[1]);
+    const start = convertHoursToAngle(range[0]);
+    const end = convertHoursToAngle(range[1]);
 
-    let hasAdditionalCircle = (time[1] - time[0]) > 12;
+    let hasAdditionalCircle = (range[1] - range[0]) > 12;
 
     if (end - start < 0) {
-        hasAdditionalCircle = (24 + time[1] - time[0]) > 12;
+        hasAdditionalCircle = (24 + range[1] - range[0]) > 12;
     }
 
     const container = useRef<HTMLDivElement | null>(null);
@@ -107,11 +119,11 @@ export const Clocker = ({
         }
 
         if (dragType === 'start') {
-            onChange([newStartTime, time[1]]);
+            onChange([newStartTime, range[1]]);
         }
 
         if (dragType === 'end') {
-            onChange([time[0], newEndTime]);
+            onChange([range[0], newEndTime]);
         }
 
         setStartPoint(position);
