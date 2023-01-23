@@ -58,8 +58,11 @@ export const Clocker = ({
     const start = convertHoursToAngle(time[0]);
     const end = convertHoursToAngle(time[1]);
 
-    // @todo: fix the second circle
-    const hasAdditionalCircle = (end - start < 0) || (Math.abs(time[1] - time[0]) > 12);
+    let hasAdditionalCircle = (time[1] - time[0]) > 12;
+
+    if (end - start < 0) {
+        hasAdditionalCircle = (24 + time[1] - time[0]) > 12;
+    }
 
     const container = useRef<HTMLDivElement | null>(null);
 
