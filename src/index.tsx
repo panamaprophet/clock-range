@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, MouseEventHandler, MouseEvent } from 'react';
+import { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
 import styles from './styles.module.css';
 
 
@@ -19,18 +19,6 @@ const getFillAngle = (start: number, end: number) => {
 };
 
 const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
-
-
-const Circle = (customProps: { [k: string]: unknown }) => {
-    const props = {
-        r: 5,
-        cx: 10,
-        cy: 10,
-        ...customProps,
-    };
-
-    return <circle className={styles.circle} {...props} />;
-};
 
 
 interface Props {
@@ -67,27 +55,35 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
 
     const container = useRef<HTMLDivElement | null>(null);
 
-    const onDragStart = (
-        event: MouseEvent<HTMLDivElement | SVGCircleElement>,
-        type: 'range' | 'start' | 'end'
-    ) => {
-        setDragType(type);
-        setStartPoint({ x: event.clientX, y: event.clientY });
-    };
+    const circleSize = { r: 5, cx: 10, cy: 10 };
 
-    const onDragEnd: MouseEventHandler = () => {
+    const onDragStart =
+        (type: 'range' | 'start' | 'end') =>
+            (event: MouseEvent<HTMLDivElement | SVGCircleElement> | TouchEvent<HTMLDivElement | SVGCircleElement>) => {
+                const x = 'touches' in event ? event.touches[0].clientX : event.clientX;
+                const y = 'touches' in event ? event.touches[0].clientY : event.clientY;
+
+                setStartPoint({ x, y });
+                setDragType(type);
+            };
+
+    const onRangeDragStart = onDragStart('range');
+    const onStartHandleDragStart = onDragStart('start');
+    const onEndHandleDragStart = onDragStart('end');
+
+    const onDragEnd = () => {
         setDragType(null);
     };
 
-    const onDrag: MouseEventHandler = (event) => {
+    const onDrag = (event: MouseEvent<HTMLDivElement | SVGCircleElement> | TouchEvent<HTMLDivElement | SVGCircleElement>) => {
         if (!dragType) {
             return;
         }
 
-        const position = {
-            x: event.clientX,
-            y: event.clientY,
-        };
+        const x = 'touches' in event ? event.touches[0].clientX : event.clientX;
+        const y = 'touches' in event ? event.touches[0].clientY : event.clientY;
+
+        const position = { x, y };
 
         const startAngle = Math.atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x) * 180 / Math.PI;
         const currentAngle = Math.atan2(position.y - centerPoint.y, position.x - centerPoint.x) * 180 / Math.PI;
@@ -121,7 +117,6 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
         setStartPoint(position);
     };
 
-
     useEffect(() => {
         const containerPosition = container.current?.getBoundingClientRect()!;
 
@@ -131,7 +126,6 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
         setCenterPoint({ x, y });
     }, []);
 
-
     return (
         <div
             ref={container}
@@ -139,23 +133,30 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
             onMouseMove={onDrag}
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
+            onTouchMove={onDrag}
+            onTouchEnd={onDragEnd}
         >
             <svg className={styles.filler} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
-                {hasAdditionalCircle && <Circle />}
-                <Circle
+                {hasAdditionalCircle && <circle {...circleSize} className={styles.circle} />}
+                <circle
+                    {...circleSize}
+                    className={styles.circle}
                     strokeDasharray={`calc(${getFillAngle(start % 360, end % 360)} * 31.4 / 100) 31.4`}
-                    onMouseDown={(event: MouseEvent<SVGCircleElement>) => onDragStart(event, 'range')}
+                    onMouseDown={onRangeDragStart}
+                    onTouchStart={onRangeDragStart}
                 />
             </svg>
             <div
                 className={classnames(styles.handle, styles.handle__start)}
                 style={{ transform: `rotate(${start}deg)` }}
-                onMouseDown={event => onDragStart(event, 'start')}
+                onMouseDown={onStartHandleDragStart}
+                onTouchStart={onStartHandleDragStart}
             />
             <div
                 className={classnames(styles.handle, styles.handle__end)}
                 style={{ transform: `rotate(${end}deg)` }}
-                onMouseDown={event => onDragStart(event, 'end')}
+                onMouseDown={onEndHandleDragStart}
+                onTouchStart={onEndHandleDragStart}
             />
         </div>
     );
