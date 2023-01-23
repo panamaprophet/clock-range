@@ -2,9 +2,6 @@ import { useState, useRef, useEffect, MouseEventHandler, MouseEvent } from 'reac
 import styles from './styles.module.css';
 
 
-type TimeRange = [start: number, end: number];
-
-
 const convertHoursToAngle = (hours: number) => (360 / 12) * hours;
 
 const convertAngleToHours = (angle: number) => angle / (360 / 12);
@@ -47,8 +44,8 @@ export const Clocker = ({
     time = [0, 18],
     onChange = () => { },
 }: {
-    time: TimeRange,
-    onChange: (time: TimeRange) => void,
+    time: number[],
+    onChange: (time: number[]) => void,
 }) => {
     const [dragType, setDragType] = useState<'range' | 'start' | 'end' | null>(null);
 
