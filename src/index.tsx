@@ -1,4 +1,4 @@
-import { useState, useRef, MouseEventHandler, useEffect } from 'react';
+import { useState, useRef, useEffect, MouseEventHandler, MouseEvent } from 'react';
 import styles from './styles.module.css';
 
 
@@ -45,12 +45,12 @@ const Circle = (customProps: { [k: string]: unknown }) => {
 
 export const Clocker = ({
     time = [0, 18],
-    onChange = () => {},
+    onChange = () => { },
 }: {
     time: TimeRange,
     onChange: (time: TimeRange) => void,
 }) => {
-    const [isDragging, setDragging] = useState(false);
+    const [dragType, setDragType] = useState<'range' | 'start' | 'end' | null>(null);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
     const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
@@ -66,17 +66,20 @@ export const Clocker = ({
 
     const container = useRef<HTMLDivElement | null>(null);
 
-    const onDragStart: MouseEventHandler = (event) => {
-        setDragging(true);
+    const onDragStart = (
+        event: MouseEvent<HTMLDivElement | SVGCircleElement>,
+        type: 'range' | 'start' | 'end'
+    ) => {
+        setDragType(type);
         setStartPoint({ x: event.clientX, y: event.clientY });
     };
 
     const onDragEnd: MouseEventHandler = () => {
-        setDragging(false);
+        setDragType(null);
     };
 
     const onDrag: MouseEventHandler = (event) => {
-        if (!isDragging) {
+        if (!dragType) {
             return;
         }
 
@@ -102,7 +105,17 @@ export const Clocker = ({
         if (newStartTime < 0) newStartTime += 24;
         if (newEndTime < 0) newEndTime += 24;
 
-        onChange([newStartTime, newEndTime]);
+        if (dragType === 'range') {
+            onChange([newStartTime, newEndTime]);
+        }
+
+        if (dragType === 'start') {
+            onChange([newStartTime, time[1]]);
+        }
+
+        if (dragType === 'end') {
+            onChange([time[0], newEndTime]);
+        }
 
         setStartPoint(position);
     };
@@ -122,17 +135,27 @@ export const Clocker = ({
         <div
             ref={container}
             className={styles.root}
-            onMouseDown={onDragStart}
             onMouseMove={onDrag}
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
         >
             <svg className={styles.filler} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
                 {hasAdditionalCircle && <Circle />}
-                <Circle strokeDasharray={`calc(${getFillAngle(start % 360, end % 360)} * 31.4 / 100) 31.4`} />
+                <Circle
+                    strokeDasharray={`calc(${getFillAngle(start % 360, end % 360)} * 31.4 / 100) 31.4`}
+                    onMouseDown={(event: MouseEvent<SVGCircleElement>) => onDragStart(event, 'range')}
+                />
             </svg>
-            <div className={classnames(styles.handle, styles.handle__start)} style={{ transform: `rotate(${start}deg)` }} />
-            <div className={classnames(styles.handle, styles.handle__end)} style={{ transform: `rotate(${end}deg)` }} />
+            <div
+                className={classnames(styles.handle, styles.handle__start)}
+                style={{ transform: `rotate(${start}deg)` }}
+                onMouseDown={event => onDragStart(event, 'start')}
+            />
+            <div
+                className={classnames(styles.handle, styles.handle__end)}
+                style={{ transform: `rotate(${end}deg)` }}
+                onMouseDown={event => onDragStart(event, 'end')}
+            />
         </div>
     );
 };
