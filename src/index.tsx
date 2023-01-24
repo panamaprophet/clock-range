@@ -1,32 +1,6 @@
 import { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
+import { convertHoursToAngle, convertAngleToHours, isLongerThan12Hours, getFillAngle, classnames } from './helpers';
 import styles from './styles.module.css';
-
-
-const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
-
-const convertHoursToAngle = (hours: number) => (360 / 12) * hours;
-
-const convertAngleToHours = (angle: number) => angle / (360 / 12);
-
-const getFillAngle = (start: number, end: number) => {
-    if (end === start) {
-        return 360;
-    }
-
-    if (end <= start) {
-        return (360 - start + end) / 360 * 100;
-    }
-
-    return (end - start) / 360 * 100;
-};
-
-const isLongerThan12Hours = ([startTime, endTime]: number[]) => {
-    if (endTime - startTime < 0) {
-        return (24 + endTime - startTime) > 12;
-    }
-
-    return (endTime - startTime) > 12;
-};
 
 
 interface Props {
@@ -34,19 +8,7 @@ interface Props {
     onChange: (time: number[]) => void,
 }
 
-
-export const formatTime = (time: number) => {
-    const hours = time | 0;
-    const minutes = (time % 1) * 60 | 0;
-
-    return [hours, minutes]
-        .map(t => t
-            .toString()
-            .padStart(2, '0'))
-        .join(':');
-};
-
-export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
+export const ClockRange = ({ range, onChange }: Props) => {
     const [dragType, setDragType] = useState<'range' | 'start' | 'end' | null>(null);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
@@ -87,11 +49,8 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
         if (delta < -100) delta += 360;
         if (delta > 100) delta -= 360;
 
-        let newStartTime = convertAngleToHours(start + delta) % 24;
-        let newEndTime = convertAngleToHours(end + delta) % 24;
-
-        if (newStartTime < 0) newStartTime += 24;
-        if (newEndTime < 0) newEndTime += 24;
+        const newStartTime = convertAngleToHours(start + delta);
+        const newEndTime = convertAngleToHours(end + delta);
 
         if (dragType === 'range') {
             onChange([newStartTime, newEndTime]);
