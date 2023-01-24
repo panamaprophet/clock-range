@@ -1,3 +1,9 @@
+:root {
+    --color-handle-start: #aa4f39;
+    --color-handle-end: #27566b;
+    --color-range-fill: #aa8a39;
+}
+
 .root {
     position: relative;
     width: 100%;
@@ -23,14 +29,14 @@
 }
 
 .handle__start {
-    background-color: #aa4f39;
+    background-color: var(--color-handle-start);
 }
 
 .handle__end {
-    background-color: #27566b;
+    background-color: var(--color-handle-end);
 }
 
-.filler {
+.range {
     position: absolute;
     top: 0;
     left: 0;
@@ -38,7 +44,7 @@
 
 .circle {
     fill: transparent;
-    stroke: #aa8a39;
+    stroke: var(--color-range-fill);
     stroke-width: 10;
     stroke-opacity: 0.5;
 }

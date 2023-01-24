@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
 import styles from './styles.module.css';
 
 
+const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
+
 const convertHoursToAngle = (hours: number) => (360 / 12) * hours;
 
 const convertAngleToHours = (angle: number) => angle / (360 / 12);
@@ -18,7 +20,13 @@ const getFillAngle = (start: number, end: number) => {
     return (end - start) / 360 * 100;
 };
 
-const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
+const isLongerThan12Hours = ([startTime, endTime]: number[]) => {
+    if (endTime - startTime < 0) {
+        return (24 + endTime - startTime) > 12;
+    }
+
+    return (endTime - startTime) > 12;
+};
 
 
 interface Props {
@@ -47,19 +55,11 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
     const start = convertHoursToAngle(range[0]);
     const end = convertHoursToAngle(range[1]);
 
-    let hasAdditionalCircle = (range[1] - range[0]) > 12;
-
-    if (end - start < 0) {
-        hasAdditionalCircle = (24 + range[1] - range[0]) > 12;
-    }
-
     const container = useRef<HTMLDivElement | null>(null);
-
-    const circleSize = { r: 5, cx: 10, cy: 10 };
 
     const onDragStart =
         (type: 'range' | 'start' | 'end') =>
-            (event: MouseEvent<HTMLDivElement | SVGCircleElement> | TouchEvent<HTMLDivElement | SVGCircleElement>) => {
+            <T,>(event: MouseEvent<T> | TouchEvent<T>) => {
                 const x = 'touches' in event ? event.touches[0].clientX : event.clientX;
                 const y = 'touches' in event ? event.touches[0].clientY : event.clientY;
 
@@ -67,15 +67,11 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
                 setDragType(type);
             };
 
-    const onRangeDragStart = onDragStart('range');
-    const onStartHandleDragStart = onDragStart('start');
-    const onEndHandleDragStart = onDragStart('end');
-
     const onDragEnd = () => {
         setDragType(null);
     };
 
-    const onDrag = (event: MouseEvent<HTMLDivElement | SVGCircleElement> | TouchEvent<HTMLDivElement | SVGCircleElement>) => {
+    const onDrag = <T,>(event: MouseEvent<T> | TouchEvent<T>) => {
         if (!dragType) {
             return;
         }
@@ -83,16 +79,11 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
         const x = 'touches' in event ? event.touches[0].clientX : event.clientX;
         const y = 'touches' in event ? event.touches[0].clientY : event.clientY;
 
-        const position = { x, y };
-
         const startAngle = Math.atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x) * 180 / Math.PI;
-        const currentAngle = Math.atan2(position.y - centerPoint.y, position.x - centerPoint.x) * 180 / Math.PI;
+        const currentAngle = Math.atan2(y - centerPoint.y, x - centerPoint.x) * 180 / Math.PI;
 
         let delta = (currentAngle - startAngle);
 
-        // @todo:
-        // sometimes delta surprisingly comes extrimely high 
-        // need to figure out how to normalize it properly
         if (delta < -100) delta += 360;
         if (delta > 100) delta -= 360;
 
@@ -114,7 +105,7 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
             onChange([range[0], newEndTime]);
         }
 
-        setStartPoint(position);
+        setStartPoint({ x, y });
     };
 
     useEffect(() => {
@@ -131,32 +122,39 @@ export const ClockRange = ({ range = [0, 18], onChange }: Props) => {
             ref={container}
             className={styles.root}
             onMouseMove={onDrag}
+            onTouchMove={onDrag}
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
-            onTouchMove={onDrag}
             onTouchEnd={onDragEnd}
         >
-            <svg className={styles.filler} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
-                {hasAdditionalCircle && <circle {...circleSize} className={styles.circle} />}
+            <svg className={styles.range} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
+                {isLongerThan12Hours(range) && <circle
+                    r="5"
+                    cx="10"
+                    cy="10"
+                    className={styles.circle}
+                />}
                 <circle
-                    {...circleSize}
+                    r="5"
+                    cx="10"
+                    cy="10"
                     className={styles.circle}
                     strokeDasharray={`calc(${getFillAngle(start % 360, end % 360)} * 31.4 / 100) 31.4`}
-                    onMouseDown={onRangeDragStart}
-                    onTouchStart={onRangeDragStart}
+                    onMouseDown={onDragStart('range')}
+                    onTouchStart={onDragStart('range')}
                 />
             </svg>
             <div
                 className={classnames(styles.handle, styles.handle__start)}
                 style={{ transform: `rotate(${start}deg)` }}
-                onMouseDown={onStartHandleDragStart}
-                onTouchStart={onStartHandleDragStart}
+                onMouseDown={onDragStart('start')}
+                onTouchStart={onDragStart('start')}
             />
             <div
                 className={classnames(styles.handle, styles.handle__end)}
                 style={{ transform: `rotate(${end}deg)` }}
-                onMouseDown={onEndHandleDragStart}
-                onTouchStart={onEndHandleDragStart}
+                onMouseDown={onDragStart('end')}
+                onTouchStart={onDragStart('end')}
             />
         </div>
     );
