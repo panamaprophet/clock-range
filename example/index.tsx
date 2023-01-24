@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import * as ReactDOMClient from 'react-dom/client';
-import { ClockRange } from '../src';
-import { formatTime } from '../src/helpers';
+import { ClockRange, formatTime } from '../src';
 
 
 const App = () => {
