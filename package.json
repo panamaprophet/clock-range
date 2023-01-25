@@ -1,28 +1,33 @@
 {
   "name": "clock-range",
-  "version": "0.0.1",
+  "version": "1.0.5",
   "description": "time range selector",
-  "main": "dist/index.js",
   "source": "src/index.tsx",
-  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/types.d.ts",
+  "type": "module",
   "author": "pp",
   "license": "MIT",
-  "dependencies": {
-    "@parcel/transformer-react-refresh-wrap": "^2.4.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@parcel/packager-ts": "2.4.0",
-    "@parcel/transformer-typescript-types": "2.4.0",
+    "@parcel/packager-ts": "2.8.3",
+    "@parcel/transformer-inline-string": "2.8.3",
+    "@parcel/transformer-typescript-types": "2.8.3",
     "@types/css-modules": "^1.0.2",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.14",
-    "parcel": "^2.4.0",
-    "typescript": "^4.6.3"
+    "parcel": "^2.8.3",
+    "typescript": "^4.9.4"
   },
   "scripts": {
-    "build": "parcel build",
-    "watch": "parcel watch"
+    "build": "parcel build src/index.tsx --no-cache",
+    "watch": "parcel watch src/index.tsx"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

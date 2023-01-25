@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
 import { convertHoursToAngle, convertAngleToHours, isLongerThan12Hours, getFillAngle, classnames } from './helpers';
-import styles from './styles.module.css';
+import styles from 'bundle-text:./styles.module.css';
 
 
 interface Props {
