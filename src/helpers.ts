@@ -1,4 +1,4 @@
-export const classnames = (...args: string[]) => args.filter(Boolean).join(' ');
+export const classnames = (...args: unknown[]) => args.filter(Boolean).filter(item => typeof item !== 'object').join(' ');
 
 export const convertHoursToAngle = (hours: number) => (360 / 12) * hours;
 

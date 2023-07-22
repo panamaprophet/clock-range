@@ -5,10 +5,11 @@ import styles from 'bundle-text:./styles.module.css';
 
 interface Props {
     range: number[],
+    classNames: Partial<{ [k in 'root' | 'range' | 'circle' | 'handle' | 'handleStart' | 'handleEnd']: string }>,
     onChange: (time: number[]) => void,
 }
 
-export const ClockRange = ({ range, onChange }: Props) => {
+export const ClockRange = ({ classNames = {}, range, onChange }: Props) => {
     const [dragType, setDragType] = useState<'range' | 'start' | 'end' | null>(null);
 
     const [centerPoint, setCenterPoint] = useState({ x: 0, y: 0 });
@@ -79,38 +80,38 @@ export const ClockRange = ({ range, onChange }: Props) => {
     return (
         <div
             ref={container}
-            className={styles.root}
+            className={classnames(styles.root, classNames.root)}
             onMouseMove={onDrag}
             onTouchMove={onDrag}
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
             onTouchEnd={onDragEnd}
         >
-            <svg className={styles.range} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
+            <svg className={classnames(styles.range, classNames.range)} viewBox="0 0 20 20" style={{ transform: `rotate(${start}deg)` }}>
                 {isLongerThan12Hours(range) && <circle
                     r="5"
                     cx="10"
                     cy="10"
-                    className={styles.circle}
+                    className={classnames(styles.circle, classNames.circle)}
                 />}
                 <circle
                     r="5"
                     cx="10"
                     cy="10"
-                    className={styles.circle}
+                    className={classnames(styles.circle, classNames.circle)}
                     strokeDasharray={`calc(${getFillAngle(start % 360, end % 360)} * 31.4 / 100) 31.4`}
                     onMouseDown={onDragStart('range')}
                     onTouchStart={onDragStart('range')}
                 />
             </svg>
             <div
-                className={classnames(styles.handle, styles.handle__start)}
+                className={classnames(styles.handle, styles.handle__start, classNames.handle, classNames.handleStart)}
                 style={{ transform: `rotate(${start}deg)` }}
                 onMouseDown={onDragStart('start')}
                 onTouchStart={onDragStart('start')}
             />
             <div
-                className={classnames(styles.handle, styles.handle__end)}
+                className={classnames(styles.handle, styles.handle__end, classNames.handle, classNames.handleEnd)}
                 style={{ transform: `rotate(${end}deg)` }}
                 onMouseDown={onDragStart('end')}
                 onTouchStart={onDragStart('end')}
