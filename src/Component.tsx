@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
 import { convertHoursToAngle, convertAngleToHours, isLongerThan12Hours, getFillAngle, classnames } from './helpers';
-import styles from 'bundle-text:./styles.module.css';
+import styles from './index.module.css';
 
 
 interface Props {
-    range: number[],
-    classNames: Partial<{ [k in 'root' | 'range' | 'circle' | 'handle' | 'handleStart' | 'handleEnd']: string }>,
-    onChange: (time: number[]) => void,
+    range: [number, number],
+    classNames?: Partial<{ [k in 'root' | 'range' | 'circle' | 'handle' | 'handleStart' | 'handleEnd']: string }>,
+    onChange: (time: [number, number]) => void,
 }
 
 export const ClockRange = ({ classNames = {}, range, onChange }: Props) => {
